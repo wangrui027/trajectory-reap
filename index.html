@@ -1,340 +1,363 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>移动端实时定位追踪</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>实时轨迹采集</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
 
-    body {
-      background: linear-gradient(135deg, #1a2a6c, #2d388a, #4a4ba2);
-      color: #fff;
-      min-height: 100vh;
-      padding: 20px;
-      padding-bottom: 80px;
-    }
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2d388a, #4a4ba2);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-    header {
-      text-align: center;
-      padding: 20px 0;
-      margin-bottom: 20px;
-      position: relative;
-    }
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            position: relative;
+        }
 
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 5px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
 
-    .subtitle {
-      color: #a0d2eb;
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
+        .subtitle {
+            color: #a0d2eb;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
 
-    .status-bar {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 12px 20px;
-      margin: 15px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(5px);
-    }
+        .status-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 12px 20px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
 
-    .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .indicator {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #ff4757;
-    }
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4757;
+        }
 
-    .indicator.active {
-      background: #2ed573;
-      box-shadow: 0 0 10px #2ed573;
-    }
+        .indicator.active {
+            background: #2ed573;
+            box-shadow: 0 0 10px #2ed573;
+        }
 
-    .buttons-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin: 20px 0;
-    }
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
 
-    .btn {
-      padding: 14px 10px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
+        .btn {
+            padding: 14px 10px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
 
-    .btn i {
-      font-size: 1.4rem;
-    }
+        .btn i {
+            font-size: 1.4rem;
+        }
 
-    .btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
 
-    #startBtn {
-      background: linear-gradient(135deg, #00b712, #5aff15);
-    }
+        #startBtn {
+            background: linear-gradient(135deg, #00b712, #5aff15);
+        }
 
-    #stopBtn {
-      background: linear-gradient(135deg, #ff416c, #ff4b2b);
-    }
+        #stopBtn {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        }
 
-    #map-view {
-      background: linear-gradient(135deg, #c27c36, #ff7c00);
-    }
+        #mapView {
+            background: linear-gradient(135deg, #c27c36, #ff7c00);
+        }
 
-    #exportBtn {
-      background: linear-gradient(135deg, #0072ff, #00c6ff);
-    }
+        #exportBtn {
+            background: linear-gradient(135deg, #0072ff, #00c6ff);
+        }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-    .location-log-container {
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 20px;
-      margin-top: 20px;
-      max-height: 50vh;
-      overflow-y: auto;
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
-    }
+        .location-log-container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 50vh;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
 
-    .log-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 15px;
-    }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
 
-    .log-header h2 {
-      font-size: 1.3rem;
-    }
+        .log-header h2 {
+            font-size: 1.3rem;
+        }
 
-    #locationLog {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+        #locationLog {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-    .log-entry {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 12px;
-      padding: 15px;
-      animation: fadeIn 0.5s ease;
-    }
+        .log-entry {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            animation: fadeIn 0.5s ease;
+        }
 
-    .log-entry p {
-      margin: 5px 0;
-      font-size: 0.95rem;
-      display: flex;
-    }
+        .log-entry p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+            display: flex;
+        }
 
-    .log-entry strong {
-      min-width: 60px;
-      display: inline-block;
-      color: #a0d2eb;
-    }
+        .log-entry strong {
+            min-width: 60px;
+            display: inline-block;
+            color: #a0d2eb;
+        }
 
-    .no-logs {
-      text-align: center;
-      padding: 30px;
-      color: rgba(255, 255, 255, 0.5);
-    }
+        .no-logs {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.5);
+        }
 
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.85rem;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.2);
-      display: none;
-    }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.2);
+            display: none;
+        }
 
-    /* 滚动条样式 */
-    .location-log-container::-webkit-scrollbar {
-      width: 8px;
-    }
+        /* 滚动条样式 */
+        .location-log-container::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    .location-log-container::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 4px;
-    }
+        .location-log-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
 
-    .location-log-container::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-    }
+        .location-log-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    @media (max-width: 500px) {
-      h1 {
-        font-size: 1.5rem;
-      }
+        /* 修改后的媒体查询 - 手机两列布局 */
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 1.5rem;
+            }
 
-      .buttons-container {
-        grid-template-columns: 1fr;
-      }
+            .buttons-container {
+                grid-template-columns: repeat(2, 1fr); /* 改为两列 */
+                gap: 10px; /* 调整间隙 */
+            }
 
-      .btn {
-        flex-direction: row;
-        justify-content: flex-start;
-        padding: 15px 20px;
-      }
+            .btn {
+                flex-direction: column; /* 保持垂直布局 */
+                justify-content: center;
+                align-items: center;
+                padding: 12px 8px; /* 调整内边距 */
+                font-size: 0.9rem; /* 减小字体 */
+            }
 
-      .btn i {
-        margin-right: 10px;
-      }
-    }
-  </style>
+            .btn i {
+                margin-bottom: 5px; /* 图标和文字之间的间距 */
+                font-size: 1.2rem; /* 调整图标大小 */
+            }
+
+            .status-bar {
+                flex-direction: column; /* 状态栏垂直布局 */
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .log-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-  <header>
-    <h1><i class="fas fa-map-marker-alt"></i> 实时轨迹采集</h1>
-    <p class="subtitle">持续定位 | 轨迹记录 | 地图预览 | 数据导出</p>
+    <header>
+        <h1><i class="fas fa-map-marker-alt"></i> 实时轨迹采集</h1>
+        <p class="subtitle">持续定位 | 轨迹记录 | 地图预览 | 数据导出</p>
 
-    <div class="status-bar">
-      <div class="status-indicator">
-        <div class="indicator" id="statusIndicator"></div>
-        <span id="statusText">未开始监听</span>
-      </div>
-      <div id="counter">0 个位置点</div>
-    </div>
-  </header>
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="indicator" id="statusIndicator"></div>
+                <span id="statusText">未开始监听</span>
+            </div>
+            <div id="counter">0 个位置点</div>
+        </div>
+    </header>
 
-  <div class="buttons-container">
-    <button id="startBtn" class="btn">
-      <i class="fas fa-play-circle"></i>
-      <span>开始监听</span>
-    </button>
-    <button id="stopBtn" class="btn" disabled>
-      <i class="fas fa-stop-circle"></i>
-      <span>停止监听</span>
-    </button>
-    <button id="map-view" class="btn">
-      <i class="fas fa-map"></i>
-      <span>地图预览</span>
-    </button>
-    <button id="exportBtn" class="btn">
-      <i class="fas fa-file-export"></i>
-      <span>导出轨迹</span>
-    </button>
-  </div>
+    <div class="buttons-container">
+        <button id="startBtn" class="btn">
+            <i class="fas fa-play-circle"></i>
+            <span>开始监听</span>
+        </button>
+        <button id="stopBtn" class="btn" disabled>
+            <i class="fas fa-stop-circle"></i>
+            <span>停止监听</span>
+        </button>
+        <button id="mapView" class="btn">
+            <i class="fas fa-map"></i>
+            <span>地图预览</span>
+        </button>
+        <button id="exportBtn" class="btn">
+            <i class="fas fa-file-export"></i>
+            <span>轨迹导出</span>
+        </button>
+    </div>
 
-  <div class="location-log-container">
-    <div class="log-header">
-      <h2><i class="fas fa-history"></i> 位置记录</h2>
-      <div id="lastUpdate">最后更新: --:--:--</div>
+    <div class="location-log-container">
+        <div class="log-header">
+            <h2><i class="fas fa-history"></i> 位置记录</h2>
+            <div id="lastUpdate">最后更新: --:--:--</div>
+        </div>
+        <div id="locationLog">
+            <div class="no-logs">暂无位置数据，点击"开始监听"按钮获取位置信息</div>
+        </div>
     </div>
-    <div id="locationLog">
-      <div class="no-logs">暂无位置数据，点击"开始监听"按钮获取位置信息</div>
-    </div>
-  </div>
 </div>
 
 <footer>
-  <p>此应用在后台和锁屏状态下可持续获取位置信息 | 位置数据仅保存在本地</p>
+    <p>此应用在后台和锁屏状态下可持续获取位置信息 | 位置数据仅保存在本地</p>
 </footer>
 
 <script>
-  // 页面元素
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const exportBtn = document.getElementById('exportBtn');
-  const logEl = document.getElementById('locationLog');
-  const statusIndicator = document.getElementById('statusIndicator');
-  const statusText = document.getElementById('statusText');
-  const counterEl = document.getElementById('counter');
-  const lastUpdateEl = document.getElementById('lastUpdate');
+    // 页面元素
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const logEl = document.getElementById('locationLog');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    const counterEl = document.getElementById('counter');
+    const lastUpdateEl = document.getElementById('lastUpdate');
 
-  // 定位变量
-  let watchID = null;
-  let positions = [];
-  let isWatching = false;
+    // 定位变量
+    let watchID = null;
+    let positions = [];
+    let isWatching = false;
 
-  // 初始化
-  document.addEventListener('DOMContentLoaded', () => {
-    // 更新最后更新时间
-    updateLastUpdateTime();
-  });
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        // 更新最后更新时间
+        updateLastUpdateTime();
+    });
 
-  // 开始监听
-  startBtn.addEventListener('click', startWatching);
+    // 开始监听
+    startBtn.addEventListener('click', startWatching);
 
-  // 停止监听
-  stopBtn.addEventListener('click', stopWatching);
+    // 停止监听
+    stopBtn.addEventListener('click', stopWatching);
 
-  // 导出轨迹
-  exportBtn.addEventListener('click', exportGeoJSON);
+    // 导出轨迹
+    exportBtn.addEventListener('click', exportGeoJSON);
 
-  // 更新最后更新时间显示
-  function updateLastUpdateTime() {
-    const now = new Date();
-    lastUpdateEl.textContent = `最后更新: ${now.toLocaleTimeString()}`;
-  }
+    // 更新最后更新时间显示
+    function updateLastUpdateTime() {
+        const now = new Date();
+        lastUpdateEl.textContent = `最后更新: ${now.toLocaleTimeString()}`;
+    }
 
-  // 位置更新成功回调
-  function successCallback(position) {
-    positions.push(position); // 存储原始位置数据
+    // 位置更新成功回调
+    function successCallback(position) {
+        positions.push(position); // 存储原始位置数据
 
-    const coords = position.coords;
-    const time = new Date(position.timestamp).toLocaleString();
+        const coords = position.coords;
+        const time = new Date(position.timestamp).toLocaleString();
 
-    const logEntry = document.createElement('div');
-    logEntry.className = 'log-entry';
-    logEntry.innerHTML = `
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = `
         <p><strong>时间:</strong> ${time}</p>
         <p><strong>坐标:</strong> ${coords.longitude.toFixed(6)}, ${coords.latitude.toFixed(6)}</p>
         <p><strong>海拔:</strong> ${coords.altitude ? coords.altitude.toFixed(2) + ' 米' : 'N/A'}</p>
@@ -342,258 +365,258 @@
         ${coords.speed ? `<p><strong>速度:</strong> ${(coords.speed * 3.6).toFixed(2)} 公里/小时</p>` : ''}
       `;
 
-    // 移除"暂无数据"提示
-    if (logEl.querySelector('.no-logs')) {
-      logEl.innerHTML = '';
+        // 移除"暂无数据"提示
+        if (logEl.querySelector('.no-logs')) {
+            logEl.innerHTML = '';
+        }
+
+        // 新记录显示在顶部
+        if (logEl.firstChild) {
+            logEl.insertBefore(logEntry, logEl.firstChild);
+        } else {
+            logEl.appendChild(logEntry);
+        }
+
+        // 更新计数器和状态
+        counterEl.textContent = `${positions.length} 个位置点`;
+        updateLastUpdateTime();
     }
 
-    // 新记录显示在顶部
-    if (logEl.firstChild) {
-      logEl.insertBefore(logEntry, logEl.firstChild);
-    } else {
-      logEl.appendChild(logEntry);
+    // 错误回调
+    function errorCallback(error) {
+        let errorMsg = "";
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                errorMsg = "用户拒绝了位置请求";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                errorMsg = "位置信息不可用";
+                break;
+            case error.TIMEOUT:
+                errorMsg = "定位请求超时";
+                break;
+            default:
+                errorMsg = "发生未知错误";
+        }
+
+        const errorEl = document.createElement('div');
+        errorEl.className = 'log-entry';
+        errorEl.style.color = '#ff6b6b';
+        errorEl.innerHTML = `<p><strong>错误:</strong> ${errorMsg}</p>`;
+
+        if (logEl.firstChild) {
+            logEl.insertBefore(errorEl, logEl.firstChild);
+        } else {
+            logEl.appendChild(errorEl);
+        }
+
+        stopWatching();
+        updateLastUpdateTime();
     }
 
-    // 更新计数器和状态
-    counterEl.textContent = `${positions.length} 个位置点`;
-    updateLastUpdateTime();
-  }
+    // 启动监听函数
+    function startWatching() {
+        if (isWatching) return;
 
-  // 错误回调
-  function errorCallback(error) {
-    let errorMsg = "";
-    switch(error.code) {
-      case error.PERMISSION_DENIED:
-        errorMsg = "用户拒绝了位置请求";
-        break;
-      case error.POSITION_UNAVAILABLE:
-        errorMsg = "位置信息不可用";
-        break;
-      case error.TIMEOUT:
-        errorMsg = "定位请求超时";
-        break;
-      default:
-        errorMsg = "发生未知错误";
+        if (navigator.geolocation) {
+            // 尝试请求后台位置权限
+            if (navigator.permissions) {
+                navigator.permissions.query({name: 'geolocation'}).then(permissionStatus => {
+                    if (permissionStatus.state === 'granted') {
+                        startBackgroundTracking();
+                    } else {
+                        // 标准位置请求
+                        startStandardTracking();
+                    }
+                });
+            } else {
+                // 不支持Permissions API的浏览器
+                startStandardTracking();
+            }
+        } else {
+            showError("浏览器不支持定位功能");
+        }
     }
 
-    const errorEl = document.createElement('div');
-    errorEl.className = 'log-entry';
-    errorEl.style.color = '#ff6b6b';
-    errorEl.innerHTML = `<p><strong>错误:</strong> ${errorMsg}</p>`;
-
-    if (logEl.firstChild) {
-      logEl.insertBefore(errorEl, logEl.firstChild);
-    } else {
-      logEl.appendChild(errorEl);
-    }
-
-    stopWatching();
-    updateLastUpdateTime();
-  }
-
-  // 启动监听函数
-  function startWatching() {
-    if (isWatching) return;
-
-    if (navigator.geolocation) {
-      // 尝试请求后台位置权限
-      if (navigator.permissions) {
-        navigator.permissions.query({name: 'geolocation'}).then(permissionStatus => {
-          if (permissionStatus.state === 'granted') {
-            startBackgroundTracking();
-          } else {
-            // 标准位置请求
-            startStandardTracking();
-          }
-        });
-      } else {
-        // 不支持Permissions API的浏览器
-        startStandardTracking();
-      }
-    } else {
-      showError("浏览器不支持定位功能");
-    }
-  }
-
-  function startStandardTracking() {
-    watchID = navigator.geolocation.watchPosition(
+    function startStandardTracking() {
+        watchID = navigator.geolocation.watchPosition(
             successCallback,
             errorCallback,
             {
-              timeout: 15000,
-              maximumAge: 5000,
-              enableHighAccuracy: true
+                timeout: 15000,
+                maximumAge: 5000,
+                enableHighAccuracy: true
             }
-    );
-
-    updateStatus(true);
-  }
-
-  function startBackgroundTracking() {
-    try {
-      // 尝试使用后台位置API
-      if ('BackgroundGeolocation' in window) {
-        window.BackgroundGeolocation.configure({
-          desiredAccuracy: 10,
-          stationaryRadius: 20,
-          distanceFilter: 10,
-          interval: 5000,
-          fastestInterval: 2000,
-          activitiesInterval: 10000,
-          stopOnTerminate: false,
-          startOnBoot: true,
-          startForeground: true,
-          notificationTitle: '后台定位中',
-          notificationText: '正在记录您的位置',
-          debug: false
-        });
-
-        window.BackgroundGeolocation.start();
-
-        window.BackgroundGeolocation.on('location', (location) => {
-          // 将后台位置转换为标准位置对象
-          const position = {
-            coords: {
-              latitude: location.latitude,
-              longitude: location.longitude,
-              altitude: location.altitude,
-              accuracy: location.accuracy,
-              altitudeAccuracy: null,
-              heading: location.bearing,
-              speed: location.speed
-            },
-            timestamp: location.time
-          };
-
-          successCallback(position);
-        });
+        );
 
         updateStatus(true);
-      } else {
-        // 回退到标准位置跟踪
-        startStandardTracking();
-      }
-    } catch (e) {
-      console.error("后台定位错误:", e);
-      startStandardTracking();
-    }
-  }
-
-  // 停止监听函数
-  function stopWatching() {
-    if (!isWatching) return;
-
-    if (watchID) {
-      navigator.geolocation.clearWatch(watchID);
-      watchID = null;
     }
 
-    // 如果使用了后台定位，停止它
-    if ('BackgroundGeolocation' in window) {
-      window.BackgroundGeolocation.stop();
-    }
+    function startBackgroundTracking() {
+        try {
+            // 尝试使用后台位置API
+            if ('BackgroundGeolocation' in window) {
+                window.BackgroundGeolocation.configure({
+                    desiredAccuracy: 10,
+                    stationaryRadius: 20,
+                    distanceFilter: 10,
+                    interval: 5000,
+                    fastestInterval: 2000,
+                    activitiesInterval: 10000,
+                    stopOnTerminate: false,
+                    startOnBoot: true,
+                    startForeground: true,
+                    notificationTitle: '后台定位中',
+                    notificationText: '正在记录您的位置',
+                    debug: false
+                });
 
-    updateStatus(false);
-  }
+                window.BackgroundGeolocation.start();
 
-  // 更新状态显示
-  function updateStatus(watching) {
-    isWatching = watching;
-    startBtn.disabled = watching;
-    stopBtn.disabled = !watching;
+                window.BackgroundGeolocation.on('location', (location) => {
+                    // 将后台位置转换为标准位置对象
+                    const position = {
+                        coords: {
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                            altitude: location.altitude,
+                            accuracy: location.accuracy,
+                            altitudeAccuracy: null,
+                            heading: location.bearing,
+                            speed: location.speed
+                        },
+                        timestamp: location.time
+                    };
 
-    if (watching) {
-      statusIndicator.classList.add('active');
-      statusText.textContent = '监听中...';
-    } else {
-      statusIndicator.classList.remove('active');
-      statusText.textContent = '已停止';
-    }
-  }
+                    successCallback(position);
+                });
 
-  // 显示错误
-  function showError(message) {
-    const errorEl = document.createElement('div');
-    errorEl.className = 'log-entry';
-    errorEl.style.color = '#ff6b6b';
-    errorEl.innerHTML = `<p><strong>错误:</strong> ${message}</p>`;
-
-    if (logEl.firstChild) {
-      logEl.insertBefore(errorEl, logEl.firstChild);
-    } else {
-      logEl.appendChild(errorEl);
-    }
-  }
-
-  // 导出GeoJSON
-  function exportGeoJSON() {
-    if (positions.length === 0) {
-      showError("没有可导出的定位数据");
-      return;
-    }
-
-    const features = positions.map((pos, index) => ({
-      type: "Feature",
-      properties: {
-        id: index + 1,
-        time: new Date(pos.timestamp).toISOString(),
-        accuracy: pos.coords.accuracy,
-        altitude: pos.coords.altitude || null,
-        speed: pos.coords.speed || null
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [
-          pos.coords.longitude,
-          pos.coords.latitude,
-          pos.coords.altitude || 0
-        ]
-      }
-    }));
-
-    // 添加路径线
-    if (positions.length > 1) {
-      const lineCoordinates = positions.map(pos => [
-        pos.coords.longitude,
-        pos.coords.latitude,
-        pos.coords.altitude || 0
-      ]);
-
-      features.push({
-        type: "Feature",
-        properties: {
-          name: "移动路径"
-        },
-        geometry: {
-          type: "LineString",
-          coordinates: lineCoordinates
+                updateStatus(true);
+            } else {
+                // 回退到标准位置跟踪
+                startStandardTracking();
+            }
+        } catch (e) {
+            console.error("后台定位错误:", e);
+            startStandardTracking();
         }
-      });
     }
 
-    const geoJSON = {
-      type: "FeatureCollection",
-      features: features
-    };
+    // 停止监听函数
+    function stopWatching() {
+        if (!isWatching) return;
 
-    // 创建下载链接
-    const blob = new Blob([JSON.stringify(geoJSON, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `定位轨迹-${new Date().toISOString().slice(0, 10)}.geojson`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+        if (watchID) {
+            navigator.geolocation.clearWatch(watchID);
+            watchID = null;
+        }
 
-  // 页面可见性处理 - 当页面重新可见时尝试重新启动定位
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && isWatching) {
-      // 页面重新可见时重启定位
-      stopWatching();
-      setTimeout(startWatching, 500);
+        // 如果使用了后台定位，停止它
+        if ('BackgroundGeolocation' in window) {
+            window.BackgroundGeolocation.stop();
+        }
+
+        updateStatus(false);
     }
-  });
+
+    // 更新状态显示
+    function updateStatus(watching) {
+        isWatching = watching;
+        startBtn.disabled = watching;
+        stopBtn.disabled = !watching;
+
+        if (watching) {
+            statusIndicator.classList.add('active');
+            statusText.textContent = '监听中...';
+        } else {
+            statusIndicator.classList.remove('active');
+            statusText.textContent = '已停止';
+        }
+    }
+
+    // 显示错误
+    function showError(message) {
+        const errorEl = document.createElement('div');
+        errorEl.className = 'log-entry';
+        errorEl.style.color = '#ff6b6b';
+        errorEl.innerHTML = `<p><strong>错误:</strong> ${message}</p>`;
+
+        if (logEl.firstChild) {
+            logEl.insertBefore(errorEl, logEl.firstChild);
+        } else {
+            logEl.appendChild(errorEl);
+        }
+    }
+
+    // 导出GeoJSON
+    function exportGeoJSON() {
+        if (positions.length === 0) {
+            showError("没有可导出的定位数据");
+            return;
+        }
+
+        const features = positions.map((pos, index) => ({
+            type: "Feature",
+            properties: {
+                id: index + 1,
+                time: new Date(pos.timestamp).toISOString(),
+                accuracy: pos.coords.accuracy,
+                altitude: pos.coords.altitude || null,
+                speed: pos.coords.speed || null
+            },
+            geometry: {
+                type: "Point",
+                coordinates: [
+                    pos.coords.longitude,
+                    pos.coords.latitude,
+                    pos.coords.altitude || 0
+                ]
+            }
+        }));
+
+        // 添加路径线
+        if (positions.length > 1) {
+            const lineCoordinates = positions.map(pos => [
+                pos.coords.longitude,
+                pos.coords.latitude,
+                pos.coords.altitude || 0
+            ]);
+
+            features.push({
+                type: "Feature",
+                properties: {
+                    name: "移动路径"
+                },
+                geometry: {
+                    type: "LineString",
+                    coordinates: lineCoordinates
+                }
+            });
+        }
+
+        const geoJSON = {
+            type: "FeatureCollection",
+            features: features
+        };
+
+        // 创建下载链接
+        const blob = new Blob([JSON.stringify(geoJSON, null, 2)], {type: 'application/json'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `定位轨迹-${new Date().toISOString().slice(0, 10)}.geojson`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // 页面可见性处理 - 当页面重新可见时尝试重新启动定位
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && isWatching) {
+            // 页面重新可见时重启定位
+            stopWatching();
+            setTimeout(startWatching, 500);
+        }
+    });
 </script>
 </body>
 </html>
